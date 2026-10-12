@@ -94,3 +94,5 @@ button.link { display: block; margin: 0 auto 14px; border: 0; background: none; 
 .circle .man { fill: var(--man); }
 .circle .woman { fill: var(--woman); }
 @media (max-width: 420px) { .kpi .value { font-size: 22px; } .kpi .label { font-size: 11px; } }
+.circle .ghost { opacity: .3; }
+.circle .frac { fill: var(--muted); font: 600 11px system-ui, sans-serif; }

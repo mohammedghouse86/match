@@ -87,22 +87,33 @@
   const PERSON = (x, y, size, cls) => `<g class="${cls}" transform="translate(${(x - size / 2).toFixed(1)} ${(y - size * 0.58).toFixed(1)}) scale(${(size / 24).toFixed(3)})">` +
     `<circle cx="12" cy="6.5" r="5.5"/><path d="M2 27c0-6.6 4.5-11.5 10-11.5S22 20.4 22 27z"/></g>`;
 
-  // One person in the centre, n people in up to two rings around them.
-  function circle(centreCls, ringCls, n) {
+  // One person in the centre and `value` people around them. A fractional value shows its last icon partly filled:
+  // a faint full outline, with the coloured part clipped to the fraction (left to right).
+  let clipId = 0;
+  function circle(centreCls, ringCls, value) {
     const W = 300, C = W / 2, MAX = 40;
-    const shown = Math.min(n, MAX);
-    const inner = Math.min(shown, 14), outer = shown - inner;
+    const v = Math.min(value, MAX);
+    const slots = Math.ceil(v - 1e-9);
+    const inner = Math.min(slots, 14), outer = slots - inner;
     let g = PERSON(C, C, 54, centreCls + " centre");
+    let k = 0;
     const ring = (count, r, size, offset) => {
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < count; i++, k++) {
         const a = (2 * Math.PI * i) / count - Math.PI / 2 + offset;
-        g += PERSON(C + r * Math.cos(a), C + r * Math.sin(a), size, ringCls);
+        const x = C + r * Math.cos(a), y = C + r * Math.sin(a);
+        const fill = Math.min(1, v - k);                    // 1 for whole people, 0–1 for the last one
+        if (fill >= 0.999) { g += PERSON(x, y, size, ringCls); continue; }
+        const id = "mc-clip-" + ++clipId;
+        g += `<clipPath id="${id}"><rect x="${(x - size / 2).toFixed(1)}" y="${(y - size).toFixed(1)}" width="${(size * fill).toFixed(1)}" height="${(size * 2).toFixed(1)}"/></clipPath>`;
+        g += PERSON(x, y, size, ringCls + " ghost");
+        g += `<g clip-path="url(#${id})">${PERSON(x, y, size, ringCls)}</g>`;
+        g += `<text class="frac" x="${x.toFixed(1)}" y="${(y + size * 0.62 + 11).toFixed(1)}" text-anchor="middle">${fill.toFixed(1)}</text>`;
       }
     };
     ring(inner, outer ? 78 : 92, outer ? 24 : 28, 0);
     ring(outer, 128, 20, Math.PI / Math.max(outer, 1));
-    return `<svg viewBox="0 0 ${W} ${W}" role="img" aria-label="${n} around 1">${g}</svg>` +
-      (n > MAX ? `<p class="scale">${MAX} shown of ${n}.</p>` : "");
+    return `<svg viewBox="0 0 ${W} ${W}" role="img" aria-label="${value.toFixed(1)} around 1">${g}</svg>` +
+      (value > MAX ? `<p class="scale">The first ${MAX} are shown.</p>` : "");
   }
 
   async function update() {
@@ -130,18 +141,10 @@
       $("#ratio").innerHTML = `<span class="warn">No ${themOne} in the ads both fits all of this and would accept you. Try relaxing one choice.</span>`;
       return;
     }
-    const ratio = d.rivals / d.accept;
-    const n = Math.round(ratio);
-    if (n >= 1) {
-      $("#circle").innerHTML = circle(themCls, meCls, n);
-      $("#ratio").innerHTML = `About <b>${n}</b> ${n === 1 ? meCls : meWord} your age for every <b>1 ${themOne}</b> who fits and would accept you.` +
-        ` <span class="scale">(${ratio.toFixed(1)}, rounded)</span>`;
-    } else {
-      const k = Math.round(1 / ratio);       // fewer rivals than options: flip the picture
-      $("#circle").innerHTML = circle(meCls, themCls, k);
-      $("#ratio").innerHTML = `Good odds: about <b>${k}</b> ${k === 1 ? themOne : themOne === "man" ? "men" : "women"} who fit and would accept you for every <b>1 ${meCls}</b> your age.` +
-        ` <span class="scale">(${ratio.toFixed(2)} ${meWord} per ${themOne}, rounded)</span>`;
-    }
+    const ratio = Math.round((d.rivals / d.accept) * 10) / 10;     // one decimal place, shown as a partial icon
+    $("#circle").innerHTML = circle(themCls, meCls, ratio);
+    $("#ratio").innerHTML = `<b>${ratio.toFixed(1)}</b> ${ratio === 1 ? meCls : meWord} your age for every <b>1 ${themOne}</b> who fits and would accept you.` +
+      (ratio < 1 ? ` <span class="scale">Good odds: fewer competitors than options.</span>` : "");
   }
 
   // ------------------------------------------------------------------ login (token in memory only)
