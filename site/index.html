@@ -27,29 +27,26 @@
 
   <div id="calc" hidden>
   <div class="tabs" role="tablist" aria-label="Calculator">
-    <button role="tab" id="tab-bride" aria-selected="true" aria-controls="panel">I'm a bride</button>
-    <button role="tab" id="tab-groom" aria-selected="false" aria-controls="panel">I'm a groom</button>
+    <button role="tab" id="tab-bride" aria-selected="true">I'm a bride</button>
+    <button role="tab" id="tab-groom" aria-selected="false">I'm a groom</button>
   </div>
 
-  <section id="panel" class="card" role="tabpanel" aria-labelledby="tab-bride">
-    <form id="form" autocomplete="off"></form>
-  </section>
+  <div class="panels">
+    <section class="card"><h2 id="me-title"></h2><div id="me" class="grid"></div></section>
+    <section class="card"><h2 id="want-title"></h2><div id="want" class="grid"></div></section>
+  </div>
 
   <section class="card result" aria-live="polite">
-    <div id="headline" class="headline"></div>
-    <div class="row-label" id="label-match"></div>
-    <div id="icons-match" class="icons"></div>
-    <div class="row-label" id="label-rivals"></div>
-    <div id="icons-rivals" class="icons"></div>
+    <div id="kpis" class="kpis"></div>
+    <div id="circle" class="circle"></div>
     <p id="ratio" class="ratio"></p>
-    <p id="scale" class="scale"></p>
   </section>
   <button type="button" id="logout" class="link">Lock</button>
   </div>
 
   <footer>
     <p id="about"></p>
-    <p>Only your password is sent, to check access. Your calculator choices never leave your phone and nothing is stored.</p>
+    <p>Your password and your choices are sent to the server only to check access and count matches. Nothing is stored or logged, and only totals come back.</p>
   </footer>
 </main>
 <script src="config.js"></script>
