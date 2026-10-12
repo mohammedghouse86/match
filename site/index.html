@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="How many matches are there for you? A simple bride and groom calculator built from anonymous counts of newspaper matrimonial ads.">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://*.onrender.com http://127.0.0.1:8602; base-uri 'none'; form-action 'none'">
+<title>Match Calculator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Match Calculator</h1>
+    <p class="sub">How many matches are there for you, and who are you up against?</p>
+  </header>
+
+  <section id="login" class="card">
+    <form id="login-form" autocomplete="on">
+      <label class="field"><span>Password</span>
+        <input type="password" id="password" name="password" autocomplete="current-password" required minlength="1" maxlength="256"></label>
+      <button type="submit" class="primary" id="login-btn">Unlock</button>
+      <p id="login-msg" class="scale" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <div id="calc" hidden>
+  <div class="tabs" role="tablist" aria-label="Calculator">
+    <button role="tab" id="tab-bride" aria-selected="true" aria-controls="panel">I'm a bride</button>
+    <button role="tab" id="tab-groom" aria-selected="false" aria-controls="panel">I'm a groom</button>
+  </div>
+
+  <section id="panel" class="card" role="tabpanel" aria-labelledby="tab-bride">
+    <form id="form" autocomplete="off"></form>
+  </section>
+
+  <section class="card result" aria-live="polite">
+    <div id="headline" class="headline"></div>
+    <div class="row-label" id="label-match"></div>
+    <div id="icons-match" class="icons"></div>
+    <div class="row-label" id="label-rivals"></div>
+    <div id="icons-rivals" class="icons"></div>
+    <p id="ratio" class="ratio"></p>
+    <p id="scale" class="scale"></p>
+  </section>
+  <button type="button" id="logout" class="link">Lock</button>
+  </div>
+
+  <footer>
+    <p id="about"></p>
+    <p>Only your password is sent, to check access. Your calculator choices never leave your phone and nothing is stored.</p>
+  </footer>
+</main>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

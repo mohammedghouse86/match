@@ -1,0 +1,8 @@
+# Never commit the raw ad data or anything outside this folder's aggregate output.
+*.jsonl
+ad_*.json
+phones.json
+index.json
+__pycache__/
+.env
+*.log
