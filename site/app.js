@@ -7,6 +7,7 @@
   const API = ((window.MC_CONFIG && window.MC_CONFIG.API_BASE) || "").replace(/\/$/, "");
 
   const AGES = ["18–19", "20–23", "24–27", "28–31", "32–35", "36–39", "40–44", "45–49", "50+"].map((t, i) => [i, t]);
+  const YEARS = Array.from({ length: 70 - 18 + 1 }, (_, i) => [18 + i, String(18 + i)]);   // single ages 18–70
   const MY_SKIN = [["1.5", "Very fair"], ["2", "Very very fair"], ["1", "Fair"], ["0", "Wheatish / medium"]];
   const MY_EDU = [["2", "Graduate"], ["3", "Professional degree (engineer, B.Pharm…)"], ["4", "Postgraduate or doctor"],
     ["5", "Specialist doctor or PhD"], ["1", "Intermediate"], ["0", "SSC"]];
@@ -22,7 +23,7 @@
         ["age", "My age", AGES, 2], ["skin", "My complexion", MY_SKIN], ["edu", "My education", MY_EDU], ["married", "My marital history", MY_MARRIED],
       ],
       want: [
-        ["age_min", "His age from", AGES, 2], ["age_max", "His age up to", AGES, 3],
+        ["age_min", "His age from", YEARS, 24 - 18], ["age_max", "His age up to", YEARS, 31 - 18],
         ["edu", "His education at least", [["", "Any"], ["2", "Graduate"], ["3", "Professional degree"], ["4", "Postgraduate or doctor"], ["5", "Specialist or PhD"], ["doctor", "Doctors only"]], 0, "or better"],
         ["loc", "He lives in", [["", "Anywhere"], ["0", "India only"], ["1", "Abroad: Gulf or better"], ["2", "USA / Canada / UK / Australia"]]],
         ["skin", "His complexion", [["", "Any"], ["1", "Fair or fairer"], ["1.5", "Very fair or fairer"]], 0, "most men don't say"],
@@ -37,7 +38,7 @@
         ["loc", "I live in", [["0", "India"], ["1", "Gulf"], ["2", "USA / Canada / UK / Australia"]]], ["married", "My marital history", MY_MARRIED],
       ],
       want: [
-        ["age_min", "Her age from", AGES, 1], ["age_max", "Her age up to", AGES, 2],
+        ["age_min", "Her age from", YEARS, 20 - 18], ["age_max", "Her age up to", YEARS, 27 - 18],
         ["edu", "Her education at least", [["", "Any"], ["1", "Intermediate"], ["2", "Graduate"], ["3", "Professional degree"], ["4", "Postgraduate or doctor"], ["doctor", "Doctors only"]], 0, "or better"],
         ["skin", "Her complexion", [["", "Any"], ["1", "Fair or fairer"], ["1.5", "Very fair or fairer"], ["2", "Very very fair"]], 0, "women who state it"],
         ["marital", "Her marital history", MARITAL],
@@ -129,11 +130,12 @@
     if (r.status === 401) return lock("Your session ended. Please unlock again.");
     if (!r.ok) { $("#ratio").textContent = "Something went wrong. Try changing a choice."; return; }
     const d = await r.json();
+    const myTop = [19, 23, 27, 31, 35, 39, 44, 49, 80][state[mode].me.age];   // top of my age bracket, as the server uses
 
     $("#kpis").innerHTML = [
       [`${mode === "bride" ? "Men" : "Women"} who fit what you want`, d.fit, `of ${d.partners_total}`],
       ["…and would accept you", d.accept, "going by their own ads", "hl"],
-      [`${mode === "bride" ? "Women" : "Men"} your age advertising`, d.rivals, "your competition"],
+      [`${mode === "bride" ? "Women" : "Men"} aged 18–${myTop} after the same ${themOne}`, d.rivals, "your competition"],
     ].map(([l, v, sub, cls]) => `<div class="kpi ${cls || ""}"><div class="label">${esc(l)}</div><div class="value">${v}</div><div class="sub">${esc(sub)}</div></div>`).join("");
 
     if (!d.accept) {
@@ -143,7 +145,7 @@
     }
     const ratio = Math.round((d.rivals / d.accept) * 10) / 10;     // one decimal place, shown as a partial icon
     $("#circle").innerHTML = circle(themCls, meCls, ratio);
-    $("#ratio").innerHTML = `<b>${ratio.toFixed(1)}</b> ${ratio === 1 ? meCls : meWord} your age for every <b>1 ${themOne}</b> who fits and would accept you.` +
+    $("#ratio").innerHTML = `<b>${ratio.toFixed(1)}</b> ${ratio === 1 ? meCls : meWord} aged 18–${myTop} competing for every <b>1 ${themOne}</b> who fits and would accept you.` +
       (ratio < 1 ? ` <span class="scale">Good odds: fewer competitors than options.</span>` : "");
   }
 
@@ -164,6 +166,8 @@
     $("#about").textContent = `Based on ${m.men} men and ${m.women} women who placed matrimonial ads in the Siasat Daily, Hyderabad, ` +
       `on ${m.papers.length} Sundays (${m.papers[0]} to ${m.papers[m.papers.length - 1]}). Someone who advertised more than once is counted once. ` +
       "These are newspaper advertisers only, not everyone looking to marry, and what each ad says was not verified. " +
+      "Your competition is everyone of your sex aged 18 up to your age whose ad wants the same kind of partner and is no pickier than you: " +
+      "someone who demands a Gulf groom, a graduate or a never-married partner when you left that open is chasing a narrower group and is not counted. " +
       "“Would accept you” compares you with the age, complexion, education, location and marital status each ad asks for.";
     $("#login").hidden = true; $("#calc").hidden = false;
     setMode(location.hash === "#groom" ? "groom" : "bride");
